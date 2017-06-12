@@ -14,6 +14,7 @@ def producer():
         gevent.sleep(3)
 
 def ajax_endpoint(environ, start_response):
+    print "current:", gevent.getcurrent()
     status = '200 OK'
     headers = [
         ('Content-Type', 'application/json') #设定网络文件的类型是json

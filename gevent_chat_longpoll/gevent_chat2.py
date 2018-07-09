@@ -36,8 +36,8 @@ class User(object):
         self.queue = queue.Queue()
 
 rooms = {
-    'python': Room(),
-    'django': Room(),
+    'LouTiKou': Room(),
+    'YinShuiJi': Room(),
 }
 
 users = {}

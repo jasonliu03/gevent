@@ -75,7 +75,7 @@ def put(room, uid):
     room = rooms[room]
 
     message = request.form['message']
-    room.add(':'.join([uid, message]))
+    room.add(': '.join([uid, message]))
 
     return ''
 

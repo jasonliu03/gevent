@@ -39,7 +39,7 @@
         }
         .talk_show{
             width:95%;
-            height:90%;
+            height:580px;
             border:1px solid #666;
             background:#fff;
             margin:10px auto 0;
@@ -98,18 +98,6 @@
 
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function() {
-            $('#newmessage').submit(function(e) {
-                var message = $("#messageinput").val();
-                $.ajax({
-                    'type'     : 'POST',
-                    'url'      : '/put/{{room}}/{{uid}}',
-                    'data'     : { 'message': message },
-                    'dataType' : 'json',
-                });
-                $("#messageinput").val('');
-                $("#messageinput").focus();
-                e.preventDefault();
-            });
             $('#newword').submit(function(e) {
                 var message = $("#talkwords").val();
                 $.ajax({
@@ -164,7 +152,7 @@
                     alert("消息不能为空");
                     return;
                 }
-                if(data.split(":")[0] == "TTLove222"){
+                if(TalkWords.split(":")[0] == "TTLove222"){
                     str = '<div class="atalk"><span>' + data +'</span></div>';
                 }
                 else{
@@ -178,25 +166,8 @@
     </script>
 </head>
 <body>
-    <div>
     <div class="header" id="header">
-    在{{room}}开始聊天:
-    </div>
-    <div class="body" id="body">
-    <!--<ul id="messages">
-        {% for message in messages %}
-        <li>{{message}}</li>
-        {% endfor %}
-    </ul>-->
-    </div>
-    <div class="footer" id="footer">
-    <div id="div2" style="width: 100%; margin: 0px auto; background-color: red; overflow:hidden;">
-    <form id="newmessage" width=100%>
-        <input id="messageinput"></input>
-        <input type="submit"/>
-    </form>
-    </div>
-    </div>
+    在{{room}}偷懒开始:
     </div>
 
     <div class="talk_con">
@@ -206,13 +177,8 @@
                 <li><div class="atalk"><span id="asay">{{message}}</span></div></li>
                 {% endfor %}
             </ul>
-            
         </div>
         <div class="talk_input">
-            <select class="whotalk" id="who">
-                <option value="0">A说：</option>
-                <option value="1">B说：</option>
-            </select>
             <form id="newword">
             <input type="text" class="talk_word" id="talkwords">
             <input type="button" value="发送" class="talk_sub" id="talksub">

@@ -6,36 +6,11 @@
     <title>Main</title>
 
     <style>
-        *{
-            margin:0px;
-            padding:0px;
-        }
-        #dd1{
-            position: absolute;
-            width:100%;
-            height:100%;
-            background-color: #DDB6C1;
-        }
-
-    .header {
-        width: 100%;
-        height: 40px;  
-    }
-    .body {
-       width: 100%;
-       overflow: auto;
-    }
-    .footer {
-        width: 100%;
-        height: 50px;position: fixed; bottom:0;left:0;right:0;
-    }
-
-
         .talk_con{
             width:95%;
             height:530px;
             border:1px solid #666;
-            margin:50px auto 0;
+            margin:30px auto 0;
             background:#F9F9F9;
         }
         .talk_show{
@@ -86,6 +61,20 @@
             color:#fff;
             padding:5px 10px;
         }
+       .showImg{
+           width: 26px;
+           height: 26px;
+           border-radius: 13px;
+ 
+       }
+       .leftImg{
+           left: 10px;
+           position: absolute;
+       }
+       .rightImg{
+           right: 10px;
+           position: absolute;
+       }
 
     </style>
 
@@ -116,10 +105,10 @@
                   if (data.length > 0) {
                       var Words = document.getElementById("words");
                       if(data.split(":")[0] == "TTLove222"){
-                          str = '<div class="atalk"><span>' + data +'</span></div>';
+                          str = '<div class="atalk"><span>' + data.split(":")[1] +'</span></div>';
                       }
                       else{
-                          str = '<div class="btalk"><span>' + data +'</span></div>' ;  
+                          str = '<div class="btalk"><span>' + data.split(":")[1] +'</span></div>' ;  
                       }
                       Words.innerHTML = Words.innerHTML + str;
                       Words.scrollTop = Words.scrollHeight;
@@ -149,10 +138,10 @@
                     return;
                 }
                 if(TalkWords.split(":")[0] == "TTLove222"){
-                    str = '<div class="atalk"><span id="asay">' + data +'</span></div>';
+                    str = '<div class="atalk"><img src="/static/tt.jpg" className="showImg leftImg" /><span id="asay">' + data +'</span></div>';
                 }
                 else{
-                    str = '<div class="btalk"><span id="bsay">' + data +'</span></div>' ;  
+                    str = '<div class="btalk"><img src="/static/jj.jpg" className="showImg rightImg" /><span id="bsay">' + data +'</span></div>' ;  
                 }
                 Words.innerHTML = Words.innerHTML + str;
                 Words.scrollTop = Words.scrollHeight;
@@ -163,15 +152,15 @@
     </script>
 </head>
 <body>
-
+    <div align="center"><span><h3 style="color:#DDB6C1">楼梯间偷懒中...</h3></span></div>
     <div class="talk_con">
         <div class="talk_show" id="words">
             <ul id="messages">
                 {% for message in messages %}
                 {% if(message.split(":")[0] == "TTLove222") %}
-                    <li><div class="atalk"><span id="asay">{{message}}</span></div></li>
+                    <li><div class="atalk"><img src="/static/tt.jpg" className='showImg leftImg' /><span id="asay">{{message.split(":")[1]}}</span></div></li>
                 {% else %}
-                    <li><div class="btalk"><span id="bsay">{{message}}</span></div></li>
+                    <li><div class="btalk"><img src="/static/jj.jpg" className='showImg rightImg' /><span id="bsay">{{message.split(":")[1]}}</span></div></li>
                 {% endif %}
                 {% endfor %}
             </ul>

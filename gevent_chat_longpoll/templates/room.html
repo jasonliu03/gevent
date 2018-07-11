@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
     <title>Main</title>
 
     <style>
@@ -32,32 +33,26 @@
 
         .talk_con{
             width:95%;
-            height:80%;
+            height:530px;
             border:1px solid #666;
             margin:50px auto 0;
-            background:#f9f9f9;
+            background:#F9F9F9;
         }
         .talk_show{
-            width:95%;
-            height:580px;
+            width:90%;
+            height:470px;
             border:1px solid #666;
-            background:#fff;
+            background:#DDB6C1;
             margin:10px auto 0;
             overflow:auto;
         }
         .talk_input{
-            width:580px;
+            width:100%;
             margin:10px auto 0;
         }
-        .whotalk{
-            width:80px;
-            height:30px;
-            float:left;
-            outline:none;
-        }
         .talk_word{
-            width:420px;
-            height:26px;
+            width:80%;
+            height:30px;
             padding:0px;
             float:left;
             margin-left:10px;
@@ -65,7 +60,7 @@
             text-indent:10px;
         }        
         .talk_sub{
-            width:56px;
+            width:10%;
             height:30px;
             float:left;
             margin-left:10px;
@@ -127,6 +122,7 @@
                           str = '<div class="btalk"><span>' + data +'</span></div>' ;  
                       }
                       Words.innerHTML = Words.innerHTML + str;
+                      Words.scrollTop = Words.scrollHeight;
                   }
                   return longPoll();
                 },
@@ -153,12 +149,13 @@
                     return;
                 }
                 if(TalkWords.split(":")[0] == "TTLove222"){
-                    str = '<div class="atalk"><span>' + data +'</span></div>';
+                    str = '<div class="atalk"><span id="asay">' + data +'</span></div>';
                 }
                 else{
-                    str = '<div class="btalk"><span>' + data +'</span></div>' ;  
+                    str = '<div class="btalk"><span id="bsay">' + data +'</span></div>' ;  
                 }
                 Words.innerHTML = Words.innerHTML + str;
+                Words.scrollTop = Words.scrollHeight;
             }
 
         }
@@ -166,15 +163,16 @@
     </script>
 </head>
 <body>
-    <div class="header" id="header">
-    在{{room}}偷懒开始:
-    </div>
 
     <div class="talk_con">
         <div class="talk_show" id="words">
             <ul id="messages">
                 {% for message in messages %}
-                <li><div class="atalk"><span id="asay">{{message}}</span></div></li>
+                {% if(message.split(":")[0] == "TTLove222") %}
+                    <li><div class="atalk"><span id="asay">{{message}}</span></div></li>
+                {% else %}
+                    <li><div class="btalk"><span id="bsay">{{message}}</span></div></li>
+                {% endif %}
                 {% endfor %}
             </ul>
         </div>

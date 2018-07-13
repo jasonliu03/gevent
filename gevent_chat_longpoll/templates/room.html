@@ -7,17 +7,17 @@
 
     <style>
         .talk_con{
-            width:95%;
+            width:98%;
             height:530px;
             border:1px solid #666;
             margin:30px auto 0;
-            background:#F9F9F9;
         }
         .talk_show{
-            width:90%;
+            width:93%;
             height:470px;
             border:1px solid #666;
             background:#DDB6C1;
+            background-size: 100%; 
             margin:10px auto 0;
             overflow:auto;
         }
@@ -26,6 +26,7 @@
             margin:10px auto 0;
         }
         .talk_word{
+            background:#DDB6C1;
             width:70%;
             height:30px;
             padding:0px;
@@ -35,6 +36,8 @@
             text-indent:10px;
         }        
         .talk_sub{
+            background:#DDB6C1;
+            color:#FFFFFF;
             width:15%;
             height:30px;
             float:left;
@@ -45,7 +48,7 @@
         }
         .atalk span{
             display:inline-block;
-            background:#0181cc;
+            background:#5e9a5e;
             border-radius:10px;
             color:#fff;
             padding:5px 10px;
@@ -121,13 +124,27 @@
                 $("#talkwords").focus();
                 e.preventDefault();
             });
+
+            $('#talksub').click(function(e) {
+                var message = $("#talkwords").val();
+                $.ajax({
+                    'type'     : 'POST',
+                    'url'      : '/put/{{room}}/{{uid}}',
+                    'data'     : { 'message': message },
+                    'dataType' : 'json',
+                });
+                $("#talkwords").val('');
+                $("#talkwords").focus();
+                e.preventDefault();
+            });
+
             var longPoll = function() {
               return $.ajax({
                 type: "POST",
                 url: "/poll/" + "{{uid}}",
                 async: true,
                 cache: false,
-                timeout: 100000,
+                timeout: 126144000,
                 success: function(data) {
                   if (data.length > 0) {
                       var Words = document.getElementById("words");
@@ -162,8 +179,6 @@
                 //定义空字符串
                 var str = "";
                 if(TalkWords.value == ""){
-                     // 消息为空时弹窗
-                    alert("消息不能为空");
                     return;
                 }
                 if(TalkWords.value.split(":")[0] == "TTLove222"){
@@ -182,7 +197,7 @@
     </script>
 </head>
 <body>
-    <div align="center"><span><h3 style="color:#DDB6C1">楼梯间偷懒中...</h3></span></div>
+    <div align="center"><span><h3 style="color:#DDB6C1">楼梯间<img width=30% src="/static/background.jpg" />偷懒中...</h3></span></div>
     <div class="talk_con">
         <div class="talk_show" id="words">
             <div id="messages">
@@ -197,7 +212,7 @@
         </div>
         <div class="talk_input">
             <form id="newword">
-            <input type="text" class="talk_word" id="talkwords">
+            <input type="text" autocomplete="off" class="talk_word" id="talkwords">
             <input type="button" value="发送" class="talk_sub" id="talksub">
             </form>
         </div>

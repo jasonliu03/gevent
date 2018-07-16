@@ -8,6 +8,9 @@ from flask import Flask, render_template, request, json #也可以用其它比�
 
 from gevent import queue
 from gevent.pywsgi import WSGIServer
+import redis
+import json
+import time
 
 app = Flask(__name__)
 app.debug = True
@@ -17,18 +20,27 @@ class Room(object):
     def __init__(self):
         self.users = set()
         self.messages = []
+        self.redis = redis.Redis(host="localhost", port=6379)
 
-    def backlog(self, size=25):
-        return self.messages[-size:]
+    def backlog(self, size=100):
+        recList = self.redis.lrange("messages", 0, size)
+        rtnList = []
+        for e in recList:
+            rst = json.loads(e)
+            rtnList.append(rst[0])
+        return rtnList
 
     def subscribe(self, user):
         self.users.add(user)
 
     def add(self, message):
         for user in self.users:
-            print user
             user.queue.put_nowait(message)
         self.messages.append(message)
+
+        data = [ message, time.time() ] 
+        value = json.dumps(data)
+        res = self.redis.lpush("messages", value)
 
 class User(object):
 

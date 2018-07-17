@@ -28,6 +28,7 @@ class Room(object):
         for e in recList:
             rst = json.loads(e)
             rtnList.append(rst[0])
+        rtnList.reverse()
         return rtnList
 
     def subscribe(self, user):

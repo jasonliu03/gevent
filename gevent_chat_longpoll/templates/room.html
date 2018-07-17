@@ -52,6 +52,7 @@
             border-radius:10px;
             color:#fff;
             padding:5px 10px;
+            margin:10px;
         }
         .btalk{
             margin:10px;
@@ -63,6 +64,12 @@
             border-radius:10px;
             color:#fff;
             padding:5px 10px;
+            margin:10px;
+            text-align:left;
+        }
+        .message{
+            float:left;
+            text-align: left;
         }
         .showTxt{
             width: auto;
@@ -94,15 +101,15 @@
             width: 40px;
             height: 40px;
             border-radius: 13px;
-
         }
         .leftImg{
             left: 10%;
-            position: absolute;
+            float:left;
+            clear:left;
         }
         .rightImg{
             right: 10%;
-            position: absolute;
+            float:right;
         }
 
 
@@ -150,11 +157,11 @@
                       var Words = document.getElementById("words");
                       if(data.split(":")[0] == "TTLove222"){
                           //str = '<li><div class="atalk"><img src="/static/tt.jpg" class="showImg leftImg" /><span class="showTxt left" id="asay">' + data.split(":")[1] +'</span></div></li>';
-                          str = '<div class="atalk"><img src="/static/tt.jpg" /><span id="asay">' + data.split(":")[1] +'</span></div>';
+                          str = '<div class="atalk"><img src="/static/tt.jpg" class="showImg" /><span id="asay">' + data.split(":")[1] +'</span></div>';
                       }
                       else{
                           //str = '<li><div class="btalk"><span class="showTxt right" id="bsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg rightImg" /></div></li>';
-                          str = '<div class="btalk"><span id="bsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" /></div>';
+                          str = '<div class="btalk"><span id="bsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg" /></div>';
                       }
                       Words.innerHTML = Words.innerHTML + str;
                       Words.scrollTop = Words.scrollHeight;
@@ -183,10 +190,10 @@
                 }
                 if(TalkWords.value.split(":")[0] == "TTLove222"){
                     //str = '<li><div class="atalk"><img src="/static/tt.jpg" class="showImg leftImg" /><span class="showTxt left" id="asay">' + TalkWords.split(":")[1] +'</span></div></li>';
-                    str = '<div class="atalk"><img src="/static/tt.jpg" /><span id="asay">' + TalkWords.split(":")[1] +'</span></div>';
+                    str = '<div class="atalk"><img src="/static/tt.jpg" class="showImg" /><span id="asay">' + TalkWords.split(":")[1] +'</span></div>';
                 }
                 else{
-                    str = '<div class="btalk"><span id="bsay">' + TalkWords.split(":")[1] +'</span><img src="/static/jj.jpg" /></div>' ;  
+                    str = '<div class="btalk"><span id="bsay">' + TalkWords.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg" /></div>' ;  
                 }
                 Words.innerHTML = Words.innerHTML + str;
                 Words.scrollTop = Words.scrollHeight;
@@ -203,7 +210,7 @@
             <div id="messages">
                 {% for message in messages %}
                 {% if(message.split(":")[0] == "TTLove222") %}
-                    <div class="atalk"><img src="/static/tt.jpg" /><span id="asay">{{message.split(":")[1]}}</span></div>
+                   <div class="atalk"><img src="/static/tt.jpg" class="showImg" /><span id="asay">{{message.split(":")[1]}}</span></div>
                 {% else %}
                     <div class="btalk"><span id="bsay">{{message.split(":")[1]}}</span><img src="/static/jj.jpg" class="showImg" /></div>
                 {% endif %}

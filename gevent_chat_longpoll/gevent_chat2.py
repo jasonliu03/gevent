@@ -27,7 +27,9 @@ class Room(object):
         rtnList = []
         for e in recList:
             rst = json.loads(e)
-            rtnList.append(rst[0])
+            time_local = time.localtime(rst[1])
+            rst[1] = time.strftime("%Y-%m-%d %H:%M:%S",time_local)
+            rtnList.append(rst)
         rtnList.reverse()
         return rtnList
 

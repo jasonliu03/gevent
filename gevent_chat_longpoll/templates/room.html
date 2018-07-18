@@ -56,6 +56,7 @@
         }
         .btalk{
             margin:10px;
+            float:right;
             text-align:right;
         }
         .btalk span{
@@ -209,10 +210,10 @@
         <div class="talk_show" id="words">
             <div id="messages">
                 {% for message in messages %}
-                {% if(message.split(":")[0] == "TTLove222") %}
-                   <div class="atalk"><img src="/static/tt.jpg" class="showImg" /><span id="asay">{{message.split(":")[1]}}</span></div>
+                {% if(message[0].split(":")[0] == "TTLove222") %}
+                    <div class="atalk"><img src="/static/tt.jpg" class="showImg" /><div>{{ message[1] }}</div><span id="asay">{{message[0].split(":")[1]}}</span></div>
                 {% else %}
-                    <div class="btalk"><span id="bsay">{{message.split(":")[1]}}</span><img src="/static/jj.jpg" class="showImg" /></div>
+                    <div class="btalk"><div>{{ message[1] }}</div><span id="bsay">{{message[0].split(":")[1]}}</span><img src="/static/jj.jpg" class="showImg" /></div>
                 {% endif %}
                 {% endfor %}
             </div>

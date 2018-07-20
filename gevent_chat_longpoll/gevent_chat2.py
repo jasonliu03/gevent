@@ -68,12 +68,55 @@ def main(uid):
         rooms=rooms.keys() #格局选择的连接,通过GET方法转到那个相应url:/<room>/<uid>
     )
 
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
+ 
+# 第三方 SMTP 服务
+#mail_host="smtp.qq.com"  #设置服务器
+#mail_host="smtp.outlook.com"  #设置服务器
+mail_host="smtp.163.com"  #设置服务器
+#mail_host="smtp.zhiyuntcm.com"  #设置服务器
+#mail_user="415951163@qq.com"    #用户名
+#mail_user="jason.liu003@outlook.com"    #用户名
+mail_user="ziqidonglai03@163.com"    #用户名
+#mail_user="liushaojie@zhiyuntcm.com"    #用户名
+mail_pass="pingliao"   #口令 
+ 
+ 
+sender = 'ziqidonglai03@163.com'
+#sender = '415951163@qq.com'
+#sender = 'jason.liu003@outlook.com'
+#sender = 'liushaojie@zhiyuntcm.com'
+receivers = ['ziqidonglai03@163.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+ 
 @app.route('/<room>/<uid>') #请求被转到了这里
 def join(room, uid):
     user = users.get(uid, None)
 
     if not user:
         users[uid] = user = User()
+
+    if uid == "TTLove222": 
+        try:
+            smtpObj = smtplib.SMTP() 
+            smtpObj.connect(mail_host, 25)    # 25 为 SMTP 端口号
+            smtpObj.starttls()
+            smtpObj.login(mail_user,mail_pass)  
+
+            time_local = time.localtime(time.time())
+            strTime = time.strftime("%Y-%m-%d %H:%M:%S",time_local)
+            message = MIMEText('ID: 222 ' + 'time:' + strTime, 'plain', 'utf-8')
+            message['From'] = Header("vivian@163.com", 'utf-8')
+            message['To'] =  Header("ziqidonglai03@163.com", 'utf-8')
+             
+            subject = 'ttandjj'
+            message['Subject'] = Header(subject, 'utf-8')
+            smtpObj.sendmail(sender, receivers, message.as_string())
+            print "邮件发送成功"
+        except smtplib.SMTPException as e:
+            print e 
+            print "Error: 无法发送邮件"
 
     active_room = rooms[room]
     active_room.subscribe(user)

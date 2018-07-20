@@ -56,7 +56,6 @@
         }
         .btalk{
             margin:10px;
-            float:right;
             text-align:right;
         }
         .btalk span{
@@ -112,6 +111,9 @@
             right: 10%;
             float:right;
         }
+        .time{
+            color: red;
+        }
 
 
     </style>
@@ -122,6 +124,11 @@
         $(document).ready(function() {
             $('#newword').submit(function(e) {
                 var message = $("#talkwords").val();
+                alert("submit");
+                if(message == ''){
+                    e.preventDefault();
+                    return;
+                }
                 $.ajax({
                     'type'     : 'POST',
                     'url'      : '/put/{{room}}/{{uid}}',
@@ -135,6 +142,7 @@
 
             $('#talksub').click(function(e) {
                 var message = $("#talkwords").val();
+                if(message == '') return;
                 $.ajax({
                     'type'     : 'POST',
                     'url'      : '/put/{{room}}/{{uid}}',
@@ -146,6 +154,22 @@
                 e.preventDefault();
             });
 
+            function formatDateTime(inputTime) {  
+                var date = new Date(inputTime);
+                var y = date.getFullYear();  
+                var m = date.getMonth() + 1;  
+                m = m < 10 ? ('0' + m) : m;  
+                var d = date.getDate();  
+                d = d < 10 ? ('0' + d) : d;  
+                var h = date.getHours();
+                h = h < 10 ? ('0' + h) : h;
+                var minute = date.getMinutes();
+                var second = date.getSeconds();
+                minute = minute < 10 ? ('0' + minute) : minute;  
+                second = second < 10 ? ('0' + second) : second; 
+                return y + '-' + m + '-' + d+' '+h+':'+minute+':'+second;  
+            }
+
             var longPoll = function() {
               return $.ajax({
                 type: "POST",
@@ -156,13 +180,16 @@
                 success: function(data) {
                   if (data.length > 0) {
                       var Words = document.getElementById("words");
+                      var timestamp1 = Date.parse( new Date());
+                      //var msgTime = timetrans(timestamp1);
+                      var msgTime = formatDateTime(timestamp1);
                       if(data.split(":")[0] == "TTLove222"){
                           //str = '<li><div class="atalk"><img src="/static/tt.jpg" class="showImg leftImg" /><span class="showTxt left" id="asay">' + data.split(":")[1] +'</span></div></li>';
-                          str = '<div class="atalk"><img src="/static/tt.jpg" class="showImg" /><span id="asay">' + data.split(":")[1] +'</span></div>';
+                          str = '<div class="atalk"><div class="time">' + msgTime + '</div><img src="/static/tt.jpg" class="showImg" /><span id="asay">' + data.split(":")[1] +'</span></div>';
                       }
                       else{
                           //str = '<li><div class="btalk"><span class="showTxt right" id="bsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg rightImg" /></div></li>';
-                          str = '<div class="btalk"><span id="bsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg" /></div>';
+                          str = '<div class="btalk"><div class="time">' + msgTime + '</div><span id="bsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg" /></div>';
                       }
                       Words.innerHTML = Words.innerHTML + str;
                       Words.scrollTop = Words.scrollHeight;
@@ -175,33 +202,6 @@
             longPoll();
         });
 
-
-        window.onload = function(){
-            var Words = document.getElementById("words");
-            var Who = document.getElementById("who");
-            var TalkWords = document.getElementById("talkwords");
-            var TalkSub = document.getElementById("talksub");
-
-
-            TalkSub.onclick = function(){
-                //定义空字符串
-                var str = "";
-                if(TalkWords.value == ""){
-                    return;
-                }
-                if(TalkWords.value.split(":")[0] == "TTLove222"){
-                    //str = '<li><div class="atalk"><img src="/static/tt.jpg" class="showImg leftImg" /><span class="showTxt left" id="asay">' + TalkWords.split(":")[1] +'</span></div></li>';
-                    str = '<div class="atalk"><img src="/static/tt.jpg" class="showImg" /><span id="asay">' + TalkWords.split(":")[1] +'</span></div>';
-                }
-                else{
-                    str = '<div class="btalk"><span id="bsay">' + TalkWords.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg" /></div>' ;  
-                }
-                Words.innerHTML = Words.innerHTML + str;
-                Words.scrollTop = Words.scrollHeight;
-            }
-
-        }
-
     </script>
 </head>
 <body>
@@ -211,9 +211,9 @@
             <div id="messages">
                 {% for message in messages %}
                 {% if(message[0].split(":")[0] == "TTLove222") %}
-                    <div class="atalk"><img src="/static/tt.jpg" class="showImg" /><div>{{ message[1] }}</div><span id="asay">{{message[0].split(":")[1]}}</span></div>
+                    <div class="atalk"><div class="time">{{ message[1] }}</div><img src="/static/tt.jpg" class="showImg" /><span id="asay">{{message[0].split(":")[1]}}</span></div>
                 {% else %}
-                    <div class="btalk"><div>{{ message[1] }}</div><span id="bsay">{{message[0].split(":")[1]}}</span><img src="/static/jj.jpg" class="showImg" /></div>
+                    <div class="btalk"><div class="time">{{ message[1] }}</div><span id="bsay">{{message[0].split(":")[1]}}</span><img src="/static/jj.jpg" class="showImg" /></div>
                 {% endif %}
                 {% endfor %}
             </div>

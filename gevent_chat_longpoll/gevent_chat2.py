@@ -47,6 +47,36 @@ class Room(object):
         value = json.dumps(data)
         res = self.redis.lpush("messages", value)
 
+class RoomDraft(object):
+
+    def __init__(self):
+        self.users = set()
+        self.draft = []
+        self.redis = redis.Redis(host="localhost", port=6379)
+
+    def backlog(self, size=1000):
+        recList = self.redis.lrange("draft", 0, size)
+        rtnList = []
+        for e in recList:
+            rst = json.loads(e)
+            time_local = time.localtime(rst[1])
+            rst[1] = time.strftime("%Y-%m-%d %H:%M:%S",time_local)
+            rtnList.append(rst)
+        rtnList.reverse()
+        return rtnList
+
+    def subscribe(self, user):
+        self.users.add(user)
+
+    def add(self, message):
+        for user in self.users:
+            user.queue.put_nowait(message)
+        self.draft.append(message)
+
+        data = [ message, time.time() ] 
+        value = json.dumps(data)
+        res = self.redis.lpush("draft", value)
+
 class User(object):
 
     def __init__(self):
@@ -54,7 +84,7 @@ class User(object):
 
 rooms = {
     'LouTiKou': Room(),
-    'YinShuiJi': Room(),
+    'YinShuiJi': RoomDraft(),
 }
 
 users = {}
@@ -126,6 +156,16 @@ def join(room, uid):
 def put(room, uid):
     user = users[uid]
     room = rooms[room]
+
+    message = request.form['message']
+    room.add(': '.join([uid, message]))
+
+    return ''
+
+@app.route("/putdraft/yinshuiji/<uid>", methods=["POST"]) #通过这个url
+def putmsg(uid):
+    user = users[uid]
+    room = rooms['YinShuiJi']
 
     message = request.form['message']
     room.add(': '.join([uid, message]))

@@ -124,7 +124,6 @@
         $(document).ready(function() {
             $('#newword').submit(function(e) {
                 var message = $("#talkwords").val();
-                alert("submit");
                 if(message == ''){
                     e.preventDefault();
                     return;
@@ -152,6 +151,25 @@
                 $("#talkwords").val('');
                 $("#talkwords").focus();
                 e.preventDefault();
+            });
+
+            $("body").keydown(function(event){
+                if(event.keyCode==8){
+                    var message = $("#talkwords").val();
+                    if(message == ''){
+                        e.preventDefault();
+                        return;
+                    }
+                    alert(message);
+                    $.ajax({
+                        'type'     : 'POST',
+                        'url'      : '/putdraft/yinshuiji/{{uid}}',
+                        'data'     : { 'message': message },
+                        'dataType' : 'json',
+                    });
+                    $("#talkwords").focus();
+                    e.preventDefault();
+                }
             });
 
             function formatDateTime(inputTime) {  

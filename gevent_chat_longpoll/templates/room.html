@@ -157,7 +157,6 @@
                 if(event.keyCode==8){
                     var message = $("#talkwords").val();
                     if(message == ''){
-                        e.preventDefault();
                         return;
                     }
                     $.ajax({
@@ -167,7 +166,6 @@
                         'dataType' : 'json',
                     });
                     $("#talkwords").focus();
-                    e.preventDefault();
                 }
             });
 

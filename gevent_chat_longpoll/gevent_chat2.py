@@ -69,8 +69,6 @@ class RoomDraft(object):
         self.users.add(user)
 
     def add(self, message):
-        for user in self.users:
-            user.queue.put_nowait(message)
         self.draft.append(message)
 
         data = [ message, time.time() ] 

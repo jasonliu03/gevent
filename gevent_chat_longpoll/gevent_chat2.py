@@ -20,7 +20,7 @@ app.config.from_envvar('TTANDJJ_SETTINGS')
 class Room(object):
 
     def __init__(self):
-        self.users = set()
+        self.users = {}
         self.messages = []
         self.redis = redis.Redis(host="localhost", port=6379)
 
@@ -35,12 +35,12 @@ class Room(object):
         rtnList.reverse()
         return rtnList
 
-    def subscribe(self, user):
-        self.users.add(user)
+    def subscribe(self, uid, user):
+        self.users[uid] = user
 
     def add(self, message):
-        for user in self.users:
-            user.queue.put_nowait(message)
+        for uid in self.users.keys():
+            self.users[uid].queue.put_nowait(message)
         self.messages.append(message)
 
         data = [ message, time.time() ] 
@@ -50,7 +50,7 @@ class Room(object):
 class RoomDraft(object):
 
     def __init__(self):
-        self.users = set()
+        self.users = {}
         self.draft = []
         self.redis = redis.Redis(host="localhost", port=6379)
 
@@ -65,10 +65,12 @@ class RoomDraft(object):
         rtnList.reverse()
         return rtnList
 
-    def subscribe(self, user):
-        self.users.add(user)
+    def subscribe(self, uid, user):
+        self.users[uid] = user
 
     def add(self, message):
+        for uid in self.users.keys():
+            self.users[uid].queue.put_nowait(message)
         self.draft.append(message)
 
         data = [ message, time.time() ] 
@@ -85,7 +87,7 @@ rooms = {
     'YinShuiJi': RoomDraft(),
 }
 
-users = {}
+users = set()
 
 @app.route('/') #flask指定url的处理使用路由的方式,访问页面地址根目录就会执行choose_name
 def choose_name():
@@ -113,12 +115,13 @@ receivers = ['ziqidonglai03@163.com']  # 接收邮件，可设置为你的QQ邮�
  
 @app.route('/<room>/<uid>') #请求被转到了这里
 def join(room, uid):
-    user = users.get(uid, None)
+    #user = users.get(uid, None)
     if uid != "TTLove222" and uid != "JJLove526":
         return "Please Check your Name, My love ..."
 
-    if not user:
-        users[uid] = user = User()
+    #if not user:
+    user = User()
+    users.add(user)
 
     if uid == "TTLove222": 
         try:
@@ -142,7 +145,7 @@ def join(room, uid):
             print "Error: 无法发送邮件"
 
     active_room = rooms[room]
-    active_room.subscribe(user)
+    active_room.subscribe(uid, user)
     print 'subscribe', active_room, user
 
     messages = active_room.backlog()
@@ -152,7 +155,6 @@ def join(room, uid):
 
 @app.route("/put/<room>/<uid>", methods=["POST"]) #通过这个url
 def put(room, uid):
-    user = users[uid]
     room = rooms[room]
 
     message = request.form['message']
@@ -162,7 +164,6 @@ def put(room, uid):
 
 @app.route("/putdraft/yinshuiji/<uid>", methods=["POST"]) #通过这个url
 def putmsg(uid):
-    user = users[uid]
     room = rooms['YinShuiJi']
 
     message = request.form['message']
@@ -170,10 +171,11 @@ def putmsg(uid):
 
     return ''
 
-@app.route("/poll/<uid>", methods=["POST"])
-def poll(uid):
+@app.route("/poll/<room>/<uid>", methods=["POST"])
+def poll(room, uid):
     try:
-        msg = users[uid].queue.get(timeout=10)
+        #msg = users[uid].queue.get(timeout=10)
+        msg = rooms[room].users[uid].queue.get(timeout=10)
     except queue.Empty:
         msg = []
     return json.dumps(msg) #返回队列中包含的聊天记录

@@ -188,7 +188,7 @@
             var longPoll = function() {
               return $.ajax({
                 type: "POST",
-                url: "/poll/" + "{{uid}}",
+                url: "/poll/" + "{{room}}/" + "{{uid}}",
                 async: true,
                 cache: false,
                 timeout: 126144000,

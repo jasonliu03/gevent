@@ -11,7 +11,9 @@
     请选择偷赖聊天地点(哈哈):
     <ul>
         {% for room in rooms %}
+        {% if room == "LouTiKou" %}
         <li><a href="/{{room}}/{{uid}}">{{room}}</a></li>
+        {% endif %}
         {% endfor %}
     </ul>
 </body>

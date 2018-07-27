@@ -115,13 +115,63 @@
             color: red;
         }
 
-
     </style>
 
     <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 
     <script type="text/javascript" charset="utf-8">
+        window.document.oncontextmenu = function (e) {
+          e.preventDefault();
+        };
+
         $(document).ready(function() {
+            //var self = this;
+            var longClick =0;
+            $(".atalk span").on({
+                touchstart: function(e){
+                    longClick=0;//设置初始为0
+                    var message = e.target.innerHTML;
+                    timeOutEvent = setTimeout(function(){
+                        //此处为长按事件
+                        tt(message);
+                        longClick=1;//假如长按，则设置为1
+                    },1000);
+                },
+                touchmove: function(){
+                    clearTimeout(timeOutEvent);
+                    timeOutEvent = 0;
+                    e.preventDefault();
+                },
+                touchend: function(e){
+                    clearTimeout(timeOutEvent);
+                    if(timeOutEvent!=0 && longClick==0){//点击
+                    }
+                    return false;
+                }
+            });
+            $(".btalk span").on({
+                touchstart: function(e){
+                    longClick=0;//设置初始为0
+                    var message = e.target.innerHTML;
+                    timeOutEvent = setTimeout(function(){
+                        //此处为长按事件
+                        tt(message);
+                        longClick=1;//假如长按，则设置为1
+                    },1000);
+                },
+                touchmove: function(){
+                    clearTimeout(timeOutEvent);
+                    timeOutEvent = 0;
+                    e.preventDefault();
+                },
+                touchend: function(e){
+                    clearTimeout(timeOutEvent);
+                    if(timeOutEvent!=0 && longClick==0){//点击
+                    }
+                    return false;
+                }
+            });
+
             $('#newword').submit(function(e) {
                 var message = $("#talkwords").val();
                 if(message == ''){
@@ -200,11 +250,11 @@
                       var msgTime = formatDateTime(timestamp1);
                       if(data.split(":")[0] == "TTLove222"){
                           //str = '<li><div class="atalk"><img src="/static/tt.jpg" class="showImg leftImg" /><span class="showTxt left" id="asay">' + data.split(":")[1] +'</span></div></li>';
-                          str = '<div class="atalk"><div class="time">' + msgTime + '</div><img src="/static/tt.jpg" class="showImg" /><span id="asay">' + data.split(":")[1] +'</span></div>';
+                          str = '<div class="atalk"><div class="time">' + msgTime + '</div><img src="/static/tt.jpg" class="showImg" /><span id="imasay">' + data.split(":")[1] +'</span></div>';
                       }
                       else{
                           //str = '<li><div class="btalk"><span class="showTxt right" id="bsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg rightImg" /></div></li>';
-                          str = '<div class="btalk"><div class="time">' + msgTime + '</div><span id="bsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg" /></div>';
+                          str = '<div class="btalk"><div class="time">' + msgTime + '</div><span id="imbsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg" /></div>';
                       }
                       Words.innerHTML = Words.innerHTML + str;
                       Words.scrollTop = Words.scrollHeight;
@@ -215,7 +265,93 @@
               });
             };
             longPoll();
+            var Words = document.getElementById("words");
+            Words.scrollTop = Words.scrollHeight;
         });
+
+        function ajax(){ 
+          var ajaxData = { 
+            type:arguments[0].type || "GET", 
+            url:arguments[0].url || "", 
+            async:arguments[0].async || "true", 
+            data:arguments[0].data || null, 
+            dataType:arguments[0].dataType || "text", 
+            contentType:arguments[0].contentType || "application/x-www-form-urlencoded", 
+            beforeSend:arguments[0].beforeSend || function(){}, 
+            success:arguments[0].success || function(){}, 
+            error:arguments[0].error || function(){} 
+          } 
+          ajaxData.beforeSend() 
+          var xhr = createxmlHttpRequest();  
+          xhr.responseType=ajaxData.dataType; 
+          xhr.open(ajaxData.type,ajaxData.url,ajaxData.async);  
+          xhr.setRequestHeader("Content-Type",ajaxData.contentType);  
+          xhr.send(convertData(ajaxData.data));  
+          xhr.onreadystatechange = function() {  
+            if (xhr.readyState == 4) {  
+              if(xhr.status == 200){ 
+                ajaxData.success(xhr.response) 
+              }else{ 
+                ajaxData.error() 
+              }  
+            } 
+          }  
+        } 
+          
+        function createxmlHttpRequest() {  
+          if (window.ActiveXObject) {  
+            return new ActiveXObject("Microsoft.XMLHTTP");  
+          } else if (window.XMLHttpRequest) {  
+            return new XMLHttpRequest();  
+          }  
+        } 
+          
+        function convertData(data){ 
+          if( typeof data === 'object' ){ 
+            var convertResult = "" ;  
+            for(var c in data){  
+              convertResult+= c + "=" + data[c] + "&";  
+            }  
+            convertResult=convertResult.substring(0,convertResult.length-1) 
+            return convertResult; 
+          }else{ 
+            return data; 
+          } 
+        }
+
+        var dt1;
+        var dt2;
+        var st;
+        function fn(){
+            dt2 = new Date();   
+            if (dt2.getTime() - dt1.getTime() < 1000) {
+                clearTimeout(st);
+            }
+        }
+        function test() {
+            var message = event.srcElement.innerHTML;
+            dt1 = new Date();                
+            st = setTimeout(tt(message), 1000);
+            return true;
+        }
+        function tt(message) {                     
+            ajax({ 
+              'type'     : 'POST',
+              'url'      : '/delete/{{room}}/{{uid}}',
+              'data'     : { 'message': message },
+              'dataType' : 'json',
+              beforeSend:function(){ 
+                //some js code 
+              }, 
+              success:function(msg){ 
+                location.reload();
+              }, 
+              error:function(){ 
+                console.log("error") 
+              } 
+            })
+            return true; 
+        }
 
     </script>
 </head>

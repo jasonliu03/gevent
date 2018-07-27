@@ -47,6 +47,15 @@ class Room(object):
         value = json.dumps(data)
         res = self.redis.lpush("messages", value)
 
+    def delete(self, message):
+        recList = self.redis.lrange("messages", 0, 10)
+        for e in recList:
+            rst = json.loads(e)
+            if message in rst[0]:
+                self.redis.lrem("messages", e, 1)
+                break
+        
+
 class RoomDraft(object):
 
     def __init__(self):
@@ -76,6 +85,9 @@ class RoomDraft(object):
         data = [ message, time.time() ] 
         value = json.dumps(data)
         res = self.redis.lpush("draft", value)
+
+    def delete(self, message):
+        pass
 
 class User(object):
 
@@ -160,6 +172,15 @@ def put(room, uid):
     message = request.form['message']
     room.add(': '.join([uid, message]))
 
+    return ''
+
+@app.route("/delete/<room>/<uid>", methods=["POST"]) #通过这个url
+def delete(room, uid):
+    active_room = rooms[room]
+
+    message = request.form['message']
+    active_room.delete(':'.join([uid, message]))
+    
     return ''
 
 @app.route("/putdraft/yinshuiji/<uid>", methods=["POST"]) #通过这个url

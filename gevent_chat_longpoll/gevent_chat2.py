@@ -23,9 +23,10 @@ class Room(object):
         self.users = {}
         self.messages = []
         self.redis = redis.Redis(host="localhost", port=6379)
+        self.key = "defaultKey"
 
     def backlog(self, size=100):
-        recList = self.redis.lrange("messages", 0, size)
+        recList = self.redis.lrange(self.key, 0, size)
         rtnList = []
         for e in recList:
             rst = json.loads(e)
@@ -45,49 +46,37 @@ class Room(object):
 
         data = [ message, time.time() ] 
         value = json.dumps(data)
-        res = self.redis.lpush("messages", value)
-
-    def delete(self, message):
-        recList = self.redis.lrange("messages", 0, 10)
-        for e in recList:
-            rst = json.loads(e)
-            if message in rst[0]:
-                self.redis.lrem("messages", e, 1)
-                break
-        
-
-class RoomDraft(object):
-
-    def __init__(self):
-        self.users = {}
-        self.draft = []
-        self.redis = redis.Redis(host="localhost", port=6379)
-
-    def backlog(self, size=1000):
-        recList = self.redis.lrange("draft", 0, size)
-        rtnList = []
-        for e in recList:
-            rst = json.loads(e)
-            time_local = time.localtime(rst[1])
-            rst[1] = time.strftime("%Y-%m-%d %H:%M:%S",time_local)
-            rtnList.append(rst)
-        rtnList.reverse()
-        return rtnList
-
-    def subscribe(self, uid, user):
-        self.users[uid] = user
-
-    def add(self, message):
-        for uid in self.users.keys():
-            self.users[uid].queue.put_nowait(message)
-        self.draft.append(message)
-
-        data = [ message, time.time() ] 
-        value = json.dumps(data)
-        res = self.redis.lpush("draft", value)
+        res = self.redis.lpush(self.key, value)
 
     def delete(self, message):
         pass
+        
+class RoomChat(Room):
+
+    def __init__(self):
+        super(RoomChat, self).__init__()
+        self.key = "messages"
+
+    def delete(self, message):
+        recList = self.redis.lrange(self.key, 0, 10)
+        for e in recList:
+            rst = json.loads(e)
+            if message in rst[0]:
+                self.redis.lrem(self.key, e, 1)
+                break
+        
+
+class RoomDraft(Room):
+
+    def __init__(self):
+        super(RoomDraft, self).__init__()
+        self.key = "draft"
+
+class RoomCancel(Room):
+
+    def __init__(self):
+        super(RoomCancel, self).__init__()
+        self.key = "cancel"
 
 class User(object):
 
@@ -95,8 +84,9 @@ class User(object):
         self.queue = queue.Queue()
 
 rooms = {
-    'LouTiKou': Room(),
+    'LouTiKou': RoomChat(),
     'YinShuiJi': RoomDraft(),
+    'LouQianMuYi': RoomCancel(),
 }
 
 users = set()
@@ -180,6 +170,7 @@ def delete(room, uid):
 
     message = request.form['message']
     active_room.delete(':'.join([uid, message]))
+    cancel('LouQianMuYi', uid, message)
     
     return ''
 
@@ -190,6 +181,12 @@ def putmsg(uid):
     message = request.form['message']
     room.add(': '.join([uid, message]))
 
+    return ''
+
+def cancel(room, uid, message):
+    active_room = rooms[room]
+    active_room.add(':'.join([uid, message]))
+    
     return ''
 
 @app.route("/poll/<room>/<uid>", methods=["POST"])

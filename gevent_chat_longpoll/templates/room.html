@@ -127,51 +127,7 @@
         $(document).ready(function() {
             //var self = this;
             var longClick =0;
-            $(".atalk span").on({
-                touchstart: function(e){
-                    longClick=0;//设置初始为0
-                    var message = e.target.innerHTML;
-                    timeOutEvent = setTimeout(function(){
-                        //此处为长按事件
-                        tt(message);
-                        longClick=1;//假如长按，则设置为1
-                    },1000);
-                },
-                touchmove: function(){
-                    clearTimeout(timeOutEvent);
-                    timeOutEvent = 0;
-                    e.preventDefault();
-                },
-                touchend: function(e){
-                    clearTimeout(timeOutEvent);
-                    if(timeOutEvent!=0 && longClick==0){//点击
-                    }
-                    return false;
-                }
-            });
-            $(".btalk span").on({
-                touchstart: function(e){
-                    longClick=0;//设置初始为0
-                    var message = e.target.innerHTML;
-                    timeOutEvent = setTimeout(function(){
-                        //此处为长按事件
-                        tt(message);
-                        longClick=1;//假如长按，则设置为1
-                    },1000);
-                },
-                touchmove: function(){
-                    clearTimeout(timeOutEvent);
-                    timeOutEvent = 0;
-                    e.preventDefault();
-                },
-                touchend: function(e){
-                    clearTimeout(timeOutEvent);
-                    if(timeOutEvent!=0 && longClick==0){//点击
-                    }
-                    return false;
-                }
-            });
-
+            var timeOutEvent = 0;
             $('#newword').submit(function(e) {
                 var message = $("#talkwords").val();
                 if(message == ''){
@@ -236,6 +192,29 @@
             }
 
             var longPoll = function() {
+              $(".atalk span, .btalk span").on({
+                  touchstart: function(e){
+                      longClick=0;//设置初始为0
+                      var message = e.target.innerHTML;
+                      timeOutEvent = setTimeout(function(){
+                          //此处为长按事件
+                          tt(message);
+                          longClick=1;//假如长按，则设置为1
+                      },3000);
+                  },
+                  touchmove: function(e){
+                      clearTimeout(timeOutEvent);
+                      timeOutEvent = 0;
+                      e.preventDefault();
+                  },
+                  touchend: function(e){
+                      clearTimeout(timeOutEvent);
+                      if(timeOutEvent!=0 && longClick==0){//点击
+                      }
+                      return false;
+                  }
+              });
+
               return $.ajax({
                 type: "POST",
                 url: "/poll/" + "{{room}}/" + "{{uid}}",
@@ -245,6 +224,7 @@
                 success: function(data) {
                   if (data.length > 0) {
                       var Words = document.getElementById("words");
+                      var Messages = document.getElementById("messages");
                       var timestamp1 = Date.parse( new Date());
                       //var msgTime = timetrans(timestamp1);
                       var msgTime = formatDateTime(timestamp1);
@@ -256,7 +236,7 @@
                           //str = '<li><div class="btalk"><span class="showTxt right" id="bsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg rightImg" /></div></li>';
                           str = '<div class="btalk"><div class="time">' + msgTime + '</div><span id="imbsay">' + data.split(":")[1] +'</span><img src="/static/jj.jpg" class="showImg" /></div>';
                       }
-                      Words.innerHTML = Words.innerHTML + str;
+                      Messages.innerHTML = Messages.innerHTML + str;
                       Words.scrollTop = Words.scrollHeight;
                   }
                   return longPoll();

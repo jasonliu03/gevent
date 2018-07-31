@@ -12,6 +12,10 @@ import redis
 import json
 import time
 
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
+
 app = Flask(__name__)
 app.debug = True
 app.config.from_object('Ttandjj.default_settings')
@@ -102,18 +106,68 @@ def main(uid):
         rooms=rooms.keys() #格局选择的连接,通过GET方法转到那个相应url:/<room>/<uid>
     )
 
-import smtplib
-from email.mime.text import MIMEText
-from email.header import Header
+from threading import Thread
+import Queue
+import time
  
-# 第三方 SMTP 服务
-mail_host="smtp.163.com"  #设置服务器
-mail_user="ziqidonglai03@163.com"    #用户名
-mail_pass = app.config['PASSWORD']
+class TaskQueue(Queue.Queue):
  
- 
-sender = 'ziqidonglai03@163.com'
-receivers = ['ziqidonglai03@163.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+    def __init__(self, num_workers=1):
+        Queue.Queue.__init__(self)
+        self.num_workers = num_workers
+        self.start_workers()
+     
+    def add_task(self, task, *args, **kwargs):
+        args = args or ()
+        kwargs = kwargs or {}
+        self.put((task, args, kwargs))
+     
+    def start_workers(self):
+        for i in range(self.num_workers):
+            t = Thread(target=self.worker)
+            t.daemon = True
+            t.start()
+     
+    def worker(self):
+        while True:
+            item, args, kwargs = self.get()
+            item(*args, **kwargs)
+            self.task_done()
+
+    def task_done(self):
+        print "task done..."
+
+q = TaskQueue(num_workers=1)
+
+def sendLoginMail(*args, **kwargs):
+    # 第三方 SMTP 服务
+    mail_host="smtp.163.com"  #设置服务器
+    mail_user="ziqidonglai03@163.com"    #用户名
+    mail_pass = app.config['PASSWORD']
+     
+     
+    sender = 'ziqidonglai03@163.com'
+    receivers = ['ziqidonglai03@163.com']  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+    
+    try:
+        smtpObj = smtplib.SMTP() 
+        smtpObj.connect(mail_host, 25)    # 25 为 SMTP 端口号
+        smtpObj.starttls()
+        smtpObj.login(mail_user,mail_pass)  
+
+        time_local = time.localtime(time.time())
+        strTime = time.strftime("%Y-%m-%d %H:%M:%S",time_local)
+        message = MIMEText('ID: 222 ' + 'time:' + strTime, 'plain', 'utf-8')
+        message['From'] = Header("vivian@163.com", 'utf-8')
+        message['To'] =  Header("ziqidonglai03@163.com", 'utf-8')
+         
+        subject = 'ttandjj'
+        message['Subject'] = Header(subject, 'utf-8')
+        smtpObj.sendmail(sender, receivers, message.as_string())
+        print "邮件发送成功"
+    except smtplib.SMTPException as e:
+        print e 
+        print "Error: 无法发送邮件"
  
 @app.route('/<room>/<uid>') #请求被转到了这里
 def join(room, uid):
@@ -126,25 +180,7 @@ def join(room, uid):
     users.add(user)
 
     if uid == "TTLove222": 
-        try:
-            smtpObj = smtplib.SMTP() 
-            smtpObj.connect(mail_host, 25)    # 25 为 SMTP 端口号
-            smtpObj.starttls()
-            smtpObj.login(mail_user,mail_pass)  
-
-            time_local = time.localtime(time.time())
-            strTime = time.strftime("%Y-%m-%d %H:%M:%S",time_local)
-            message = MIMEText('ID: 222 ' + 'time:' + strTime, 'plain', 'utf-8')
-            message['From'] = Header("vivian@163.com", 'utf-8')
-            message['To'] =  Header("ziqidonglai03@163.com", 'utf-8')
-             
-            subject = 'ttandjj'
-            message['Subject'] = Header(subject, 'utf-8')
-            smtpObj.sendmail(sender, receivers, message.as_string())
-            print "邮件发送成功"
-        except smtplib.SMTPException as e:
-            print e 
-            print "Error: 无法发送邮件"
+        q.add_task(sendLoginMail)
 
     active_room = rooms[room]
     active_room.subscribe(uid, user)
